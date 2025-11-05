@@ -1,0 +1,12 @@
+.idea/
+.venv/
+
+_tmp/
+htmlcov/
+
+.coverage
+
+*.db
+*.env
+*.pyc
+*.sqlite3
