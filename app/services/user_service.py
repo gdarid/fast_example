@@ -8,15 +8,6 @@ class UserService:
     def __init__(self, session: Session):
         self._db = session
 
-    def check_commit(self) -> bool:
-        try:
-            self._db.commit()
-        except IntegrityError:
-            self._db.rollback()
-            return False
-
-        return True
-
     def list_users(self) -> list[User]:
         return self._db.query(User).all()
 
