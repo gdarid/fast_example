@@ -1,6 +1,5 @@
 from sqlalchemy import exists
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from app.db.schema import User
 
 
