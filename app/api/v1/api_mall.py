@@ -21,10 +21,10 @@ def create_mall(mall: MallCreate, service: MallService = Depends(get_mall_servic
     item_exists = service.check_name(mall.name)
     if item_exists:
         raise HTTPException(status_code=409, detail="Mall already exists with this name")
-    mall = service.create_mall(mall.name, mall.owner_id)
-    if not mall:
+    mall_new = service.create_mall(mall.name, mall.owner_id)
+    if not mall_new:
         raise HTTPException(status_code=409, detail="Mall can't be created")
-    return mall
+    return mall_new
 
 
 @router.get("/malls/{mall_id}", response_model=MallRead)

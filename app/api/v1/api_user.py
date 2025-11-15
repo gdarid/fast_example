@@ -22,11 +22,11 @@ def create_user(user: UserCreate, service: UserService = Depends(get_user_servic
     item_exists = service.check_name(user.name)
     if item_exists:
         raise HTTPException(status_code=409, detail="User already exists with this name")
-    user = service.create_user(user.name)
-    if not user:
+    user_new = service.create_user(user.name)
+    if not user_new:
         raise HTTPException(status_code=409, detail="Mall can't be created")
 
-    return user
+    return user_new
 
 
 @router.get("/users/{user_id}", response_model=UserRead)

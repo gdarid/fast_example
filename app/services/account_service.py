@@ -28,7 +28,7 @@ class AccountService:
         res = self._db.query(exists().where(Account.name == name)).scalar()
         return res
 
-    def create_account(self, name: str) -> Account:
+    def create_account(self, name: str) -> Account | None:
         account = Account(name=name)
         self._db.add(account)
         if not self.check_commit():

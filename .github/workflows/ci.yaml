@@ -29,3 +29,5 @@ jobs:
         run: uv run pytest .
       - name: lint
         run: uv run ruff check
+      - name: mypy app
+        run: uv run mypy --explicit-package-bases app

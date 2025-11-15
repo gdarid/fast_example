@@ -21,10 +21,10 @@ def create_account(account: AccountCreate, service: AccountService = Depends(get
     item_exists = service.check_name(account.name)
     if item_exists:
         raise HTTPException(status_code=409, detail="Account already exists with this name")
-    account = service.create_account(account.name)
-    if not account:
+    account_new = service.create_account(account.name)
+    if not account_new:
         raise HTTPException(status_code=409, detail="Account can't be created")
-    return account
+    return account_new
 
 
 @router.get("/accounts/{account_id}", response_model=AccountReadDetail)
