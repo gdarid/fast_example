@@ -8,8 +8,12 @@ from app.core.config import config
 sql_echo = True if config.sql_echo == "True" else config.sql_echo
 sql_echo = False if config.sql_echo == "" else sql_echo
 
-engine = create_engine(config.db_url, connect_args={"check_same_thread": False}, echo=sql_echo)
+# Only set SQLite-specific connect_args for SQLite URLs
+connect_args = {"check_same_thread": False} if config.db_url.startswith("sqlite") else {}
+
+engine = create_engine(config.db_url, connect_args=connect_args, echo=sql_echo)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 class Base(DeclarativeBase):
     pass

@@ -1,7 +1,4 @@
-from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-
-load_dotenv()
 
 # Use .env file or environment variables to replace the default values of Config
 class Config(BaseSettings):
