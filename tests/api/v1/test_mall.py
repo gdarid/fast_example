@@ -1,32 +1,19 @@
 import pytest
-from fastapi.testclient import TestClient
 
 from app.api.v1.api_mall import get_mall_service
-from app.main import app
 from app.services.mall_service import MallService
-from tests.set_test_db import TestingSessionLocal
 
-# Setup the TestClient
-client = TestClient(app)
-
-
-# Dependency to override the get_db dependency in the main app
-def override_get_mall_service():
-    session = TestingSessionLocal()
-    yield MallService(session=session)
-
-
-app.dependency_overrides[get_mall_service] = override_get_mall_service
+# Predefined fixture : client
 
 @pytest.fixture(scope="session")
-def account_id() -> int:
+def account_id(client) -> int:
     # Create a new account for malls
     response = client.post("/api/v1/accounts", json={"name": "Test Account for malls"})
     assert response.status_code == 200
     created_account = response.json()
     return created_account["id"]
 
-def test_create_and_get_mall(account_id: int):
+def test_create_and_get_mall(client, account_id: int):
     # Create a new mall
     response = client.post("/api/v1/malls", json={"name": "Test Mall", "owner_id": account_id})
     assert response.status_code == 200
@@ -49,17 +36,17 @@ def test_create_and_get_mall(account_id: int):
     assert malls[0]["id"] == created_mall["id"]
     assert malls[0]["name"] == "Test Mall"
 
-def test_create_same_mall(account_id: int):
+def test_create_same_mall(client, account_id: int):
     # Create same mall
     response = client.post("/api/v1/malls", json={"name": "Test Mall", "owner_id": account_id})
     assert response.status_code == 409
 
-def test_create_mall_with_wrong_account():
+def test_create_mall_with_wrong_account(client):
     # Create same mall
     response = client.post("/api/v1/malls", json={"name": "Test Mall wrong account", "owner_id": 0})
     assert response.status_code == 409
 
-def test_create_update_delete_mall(account_id: int):
+def test_create_update_delete_mall(client, account_id: int):
     response = client.post("/api/v1/malls", json={"name": "Test Mall 2", "owner_id": account_id})
     assert response.status_code == 200
     created_mall = response.json()
@@ -74,15 +61,15 @@ def test_create_update_delete_mall(account_id: int):
     response = client.delete(f"/api/v1/malls/{created_mall['id']}")
     assert response.status_code == 200
 
-def test_get_wrong_mall():
+def test_get_wrong_mall(client):
     response = client.get("/api/v1/malls/0")
     assert response.status_code == 404
 
-def test_update_wrong_mall():
+def test_update_wrong_mall(client):
     response = client.put("/api/v1/malls/0", json={"name": "Test Mall 2 - Updated"})
     assert response.status_code == 404
 
-def test_delete_wrong_mall():
+def test_delete_wrong_mall(client):
     response = client.delete("/api/v1/malls/0")
     assert response.status_code == 404
 

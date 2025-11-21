@@ -1,24 +1,9 @@
-from fastapi.testclient import TestClient
-
 from app.api.v1.api_user import get_user_service
-from app.main import app
 from app.services.user_service import UserService
-from tests.set_test_db import TestingSessionLocal
 
-# Setup the TestClient
-client = TestClient(app)
+# Predefined fixture : client
 
-
-# Dependency to override the get_db dependency in the main app
-def override_get_user_service():
-    session = TestingSessionLocal()
-    yield UserService(session=session)
-
-
-app.dependency_overrides[get_user_service] = override_get_user_service
-
-
-def test_create_and_get_user():
+def test_create_and_get_user(client):
     # Create a new user
     response = client.post("/api/v1/users", json={"name": "Test User"})
     assert response.status_code == 200
@@ -41,12 +26,12 @@ def test_create_and_get_user():
     assert users[0]["id"] == created_user["id"]
     assert users[0]["name"] == "Test User"
 
-def test_create_same_user():
+def test_create_same_user(client):
     # Create same user
     response = client.post("/api/v1/users", json={"name": "Test User"})
     assert response.status_code == 409
 
-def test_create_update_delete_user():
+def test_create_update_delete_user(client):
     response = client.post("/api/v1/users", json={"name": "Test User 2"})
     assert response.status_code == 200
     created_user = response.json()
@@ -57,15 +42,15 @@ def test_create_update_delete_user():
     response = client.delete(f"/api/v1/users/{created_user['id']}")
     assert response.status_code == 200
 
-def test_get_wrong_user():
+def test_get_wrong_user(client):
     response = client.get("/api/v1/users/0")
     assert response.status_code == 404
 
-def test_update_wrong_user():
+def test_update_wrong_user(client):
     response = client.put("/api/v1/users/0", json={"name": "Test User 2 - Updated"})
     assert response.status_code == 404
 
-def test_delete_wrong_user():
+def test_delete_wrong_user(client):
     response = client.delete("/api/v1/users/0")
     assert response.status_code == 404
 

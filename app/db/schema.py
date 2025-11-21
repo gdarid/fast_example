@@ -1,7 +1,7 @@
 """ Database schema """
-from typing import Generator, Any
+from typing import Generator
 from sqlalchemy import ForeignKey, UniqueConstraint, create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, relationship, Session
 
 from app.core.config import config
 
@@ -51,7 +51,7 @@ class Mall(Base):
 
 
 # Dependency helper for FastAPI to yield a DB session and close it after request
-def get_session() -> Generator[Any, None, None]:
+def get_session() -> Generator[Session, None, None]:
     session = SessionLocal()
     try:
         yield session
