@@ -1,0 +1,58 @@
+# CodeQL analysis for a Python application
+# - Runs on push and pull_request
+# - Installs dependencies (uv)
+# - Performs CodeQL static analysis and uploads results to code scanning
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+name: "CodeQL / Python"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  codeql:
+    name: CodeQL analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.13] # change/add versions if you need to build/test against multiple interpreters
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: python
+          # Optional: run the default security-and-quality query suite
+          queries: security-and-quality
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v1
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+        # You can add 'queries' or 'config-file' here to customize analysis further.
+        with:
+          # memory and threads are optional; CodeQL action will choose reasonable defaults
+          # threads: 2
+          # timeout: 120m
+          category: "security-and-quality"

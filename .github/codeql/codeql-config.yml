@@ -1,0 +1,18 @@
+# Example CodeQL configuration for a python project
+# - Excludes typical test and vendor directories
+# - Enables python-specific query options if needed
+analyze:
+  # include or exclude directories (glob patterns)
+  paths:
+    exclude:
+      - "tests/**"
+      - "venv/**"
+      - ".venv/**"
+      - "site-packages/**"
+      - "third_party/**"
+  # Optionally enable or disable specific query suites or packs
+  queries:
+    # default query packs are used when omitted; examples:
+    - security-and-quality
+    # To include custom queries, list them here:
+    # - codeql/python-queries@latest
