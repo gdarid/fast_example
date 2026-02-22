@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -7,18 +9,17 @@ from app.services.user_service import UserService
 
 router = APIRouter()
 
-
-def get_user_service(session: Session = Depends(get_session)) -> UserService:
+def get_user_service(session: Annotated[Session, Depends(get_session)]) -> UserService:
     return UserService(session=session)
 
 
 @router.get("/users", response_model=list[UserRead])
-def get_users(service: UserService = Depends(get_user_service)):
+def get_users(service: Annotated[UserService, Depends(get_user_service)]):
     return service.list_users()
 
 
 @router.post("/users", response_model=UserRead)
-def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
+def create_user(user: UserCreate, service: Annotated[UserService, Depends(get_user_service)]):
     item_exists = service.check_name(user.name)
     if item_exists:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists with this name")
@@ -28,7 +29,7 @@ def create_user(user: UserCreate, service: UserService = Depends(get_user_servic
 
 
 @router.get("/users/{user_id}", response_model=UserRead)
-def get_user(user_id: int, service: UserService = Depends(get_user_service)):
+def get_user(user_id: int, service: Annotated[UserService, Depends(get_user_service)]):
     user = service.get_user(user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -36,7 +37,7 @@ def get_user(user_id: int, service: UserService = Depends(get_user_service)):
 
 
 @router.put("/users/{user_id}", response_model=UserRead)
-def update_user(user_id: int, user: UserCreate, service: UserService = Depends(get_user_service)):
+def update_user(user_id: int, user: UserCreate, service: Annotated[UserService, Depends(get_user_service)]):
     updated = service.update_user(user_id, user.name)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -44,7 +45,7 @@ def update_user(user_id: int, user: UserCreate, service: UserService = Depends(g
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
+def delete_user(user_id: int, service: Annotated[UserService, Depends(get_user_service)]):
     success = service.delete_user(user_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

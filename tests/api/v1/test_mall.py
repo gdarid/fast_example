@@ -73,6 +73,6 @@ def test_delete_wrong_mall(client):
     response = client.delete("/api/v1/malls/0")
     assert response.status_code == 404
 
-def test_get_mall_service():
-    mall_service = get_mall_service()
+def test_get_mall_service(session_local):
+    mall_service = get_mall_service(session_local)
     assert isinstance(mall_service, MallService)

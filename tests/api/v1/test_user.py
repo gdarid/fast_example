@@ -54,6 +54,6 @@ def test_delete_wrong_user(client):
     response = client.delete("/api/v1/users/0")
     assert response.status_code == 404
 
-def test_get_user_service():
-    user_service = get_user_service()
+def test_get_user_service(session_local):
+    user_service = get_user_service(session_local)
     assert isinstance(user_service, UserService)

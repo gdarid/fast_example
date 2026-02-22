@@ -54,6 +54,6 @@ def test_delete_wrong_account(client):
     response = client.delete("/api/v1/accounts/0")
     assert response.status_code == 404
 
-def test_get_account_service():
-    account_service = get_account_service()
+def test_get_account_service(session_local):
+    account_service = get_account_service(session_local)
     assert isinstance(account_service, AccountService)

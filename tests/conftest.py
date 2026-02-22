@@ -41,3 +41,7 @@ def client():
 
     with TestClient(app) as c:
         yield c
+
+@pytest.fixture(scope="session")
+def session_local():
+    return TestingSessionLocal()
