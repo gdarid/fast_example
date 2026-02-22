@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy.orm import Session
 from sqlalchemy import exists
 from sqlalchemy.exc import IntegrityError
@@ -32,7 +30,6 @@ class MallService:
     def create_mall(self, name: str, owner_id: int) -> Mall | None:
         account = self._db.query(Account).filter(Account.id == owner_id).first()
         if not account:
-            logging.error("Account not found %s", owner_id)
             return None
         mall = Mall(name=name, owner_id=owner_id)
         self._db.add(mall)

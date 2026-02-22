@@ -1,4 +1,6 @@
 """ Database schema """
+from __future__ import annotations
+
 from typing import Generator
 from sqlalchemy import ForeignKey, UniqueConstraint, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, relationship, Session
@@ -33,7 +35,7 @@ class Account(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(index=True)
 
-    malls: Mapped[list["Mall"]] = relationship(back_populates="owner")
+    malls: Mapped[list[Mall]] = relationship(back_populates="owner")
 
     __table_args__ = (UniqueConstraint('name', name='_account_name_unique'),)
 
@@ -45,7 +47,7 @@ class Mall(Base):
     name: Mapped[str] = mapped_column(index=True)
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("account.id"))
-    owner: Mapped["Account"] = relationship(back_populates="malls")
+    owner: Mapped[Account] = relationship(back_populates="malls")
 
     __table_args__ = (UniqueConstraint('name', name='_mall_name_unique'), )
 
