@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.schema import get_session
@@ -21,7 +21,7 @@ def get_users(service: UserService = Depends(get_user_service)):
 def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
     item_exists = service.check_name(user.name)
     if item_exists:
-        raise HTTPException(status_code=409, detail="User already exists with this name")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists with this name")
     user_new = service.create_user(user.name)
 
     return user_new
@@ -31,7 +31,7 @@ def create_user(user: UserCreate, service: UserService = Depends(get_user_servic
 def get_user(user_id: int, service: UserService = Depends(get_user_service)):
     user = service.get_user(user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
 
@@ -39,7 +39,7 @@ def get_user(user_id: int, service: UserService = Depends(get_user_service)):
 def update_user(user_id: int, user: UserCreate, service: UserService = Depends(get_user_service)):
     updated = service.update_user(user_id, user.name)
     if not updated:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return updated
 
 
@@ -47,5 +47,5 @@ def update_user(user_id: int, user: UserCreate, service: UserService = Depends(g
 def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
     success = service.delete_user(user_id)
     if not success:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return {"success": True}

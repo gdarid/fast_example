@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.schema import get_session
@@ -20,10 +20,10 @@ def get_accounts(service: AccountService = Depends(get_account_service)):
 def create_account(account: AccountCreate, service: AccountService = Depends(get_account_service)):
     item_exists = service.check_name(account.name)
     if item_exists:
-        raise HTTPException(status_code=409, detail="Account already exists with this name")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists with this name")
     account_new = service.create_account(account.name)
     if not account_new:
-        raise HTTPException(status_code=409, detail="Account can't be created")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account can't be created")
     return account_new
 
 
@@ -31,7 +31,7 @@ def create_account(account: AccountCreate, service: AccountService = Depends(get
 def get_account(account_id: int, service: AccountService = Depends(get_account_service)):
     account = service.get_account(account_id)
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     detail_account = AccountReadDetail(id=account.id, name=account.name, malls_ids=[mall.id for mall in account.malls])
     return detail_account
 
@@ -40,7 +40,7 @@ def get_account(account_id: int, service: AccountService = Depends(get_account_s
 def update_account(account_id: int, account: AccountCreate, service: AccountService = Depends(get_account_service)):
     updated = service.update_account(account_id, account.name)
     if updated is None:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     return updated
 
 
@@ -48,5 +48,5 @@ def update_account(account_id: int, account: AccountCreate, service: AccountServ
 def delete_account(account_id: int, service: AccountService = Depends(get_account_service)):
     success = service.delete_account(account_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     return {"success": True}

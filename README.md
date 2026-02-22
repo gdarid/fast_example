@@ -53,17 +53,17 @@ curl -X DELETE "http://localhost:8000/api/v1/users/1"
 Simple tests can be launched (pytest)
 
 ``` bash
-pytest .
+uv run pytest .
 ```
 
 The tests can also be launched with coverage
 
 ``` bash
-pytest --cov=.
+uv run pytest --cov=.
 ```
 
 The tests can be launched with coverage and a report in HTML
 
 ``` bash
-pytest --cov=. --cov-report html
+uv run pytest --cov=. --cov-report html
 ```
