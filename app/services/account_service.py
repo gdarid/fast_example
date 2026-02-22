@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -17,7 +19,7 @@ class AccountService:
 
         return True
 
-    def list_accounts(self) -> list[Account]:
+    def list_accounts(self) -> Sequence[Account]:
         result = self._db.execute(select(Account))
         return result.scalars().all()
 

@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.schema import User
@@ -7,7 +9,7 @@ class UserService:
     def __init__(self, session: Session):
         self._db = session
 
-    def list_users(self) -> list[User]:
+    def list_users(self) -> Sequence[User]:
         result = self._db.execute(select(User))
         return result.scalars().all()
 

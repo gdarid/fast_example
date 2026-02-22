@@ -67,3 +67,11 @@ The tests can be launched with coverage and a report in HTML
 ``` bash
 uv run pytest --cov=. --cov-report html
 ```
+
+# Mypy
+
+Mypy can be used too
+
+``` bash
+uv run mypy --explicit-package-bases app
+```

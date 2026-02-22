@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -17,7 +19,7 @@ class MallService:
 
         return True
 
-    def list_malls(self) -> list[Mall]:
+    def list_malls(self) -> Sequence[Mall]:
         result = self._db.execute(select(Mall))
         return result.scalars().all()
 
