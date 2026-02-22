@@ -1,4 +1,4 @@
-from sqlalchemy import exists
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.schema import User
 
@@ -8,14 +8,16 @@ class UserService:
         self._db = session
 
     def list_users(self) -> list[User]:
-        return self._db.query(User).all()
+        result = self._db.execute(select(User))
+        return result.scalars().all()
 
     def get_user(self, user_id: int) -> User | None:
-        return self._db.query(User).filter(User.id == user_id).first()
+        result = self._db.execute(select(User).where(User.id == user_id))
+        return result.scalars().first()
 
     def check_name(self, name: str) -> bool:
-        res = self._db.query(exists().where(User.name == name)).scalar()
-        return res
+        result = self._db.execute(select(User).where(User.name == name))
+        return result.scalars().first() is not None
 
     def create_user(self, name: str) -> User:
         user = User(name=name)

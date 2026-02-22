@@ -1,4 +1,4 @@
-from sqlalchemy import exists
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.db.schema import Account
@@ -18,15 +18,16 @@ class AccountService:
         return True
 
     def list_accounts(self) -> list[Account]:
-        return self._db.query(Account).all()
+        result = self._db.execute(select(Account))
+        return result.scalars().all()
 
     def get_account(self, account_id: int) -> Account | None:
-        account = self._db.query(Account).filter(Account.id == account_id).first()
-        return account
+        result = self._db.execute(select(Account).where(Account.id == account_id))
+        return result.scalars().first()
 
     def check_name(self, name: str) -> bool:
-        res = self._db.query(exists().where(Account.name == name)).scalar()
-        return res
+        result = self._db.execute(select(Account).where(Account.name == name))
+        return result.scalars().first() is not None
 
     def create_account(self, name: str) -> Account | None:
         account = Account(name=name)

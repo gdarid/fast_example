@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import exists
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from app.db.schema import Mall, Account
 
@@ -18,17 +18,20 @@ class MallService:
         return True
 
     def list_malls(self) -> list[Mall]:
-        return self._db.query(Mall).all()
+        result = self._db.execute(select(Mall))
+        return result.scalars().all()
 
     def get_mall(self, mall_id: int) -> Mall | None:
-        return self._db.query(Mall).filter(Mall.id == mall_id).first()
+        result = self._db.execute(select(Mall).where(Mall.id == mall_id))
+        return result.scalars().first()
 
     def check_name(self, name: str) -> bool:
-        res = self._db.query(exists().where(Mall.name == name)).scalar()
-        return res
+        result = self._db.execute(select(Mall).where(Mall.name == name))
+        return result.scalars().first() is not None
 
     def create_mall(self, name: str, owner_id: int) -> Mall | None:
-        account = self._db.query(Account).filter(Account.id == owner_id).first()
+        result = self._db.execute(select(Account).where(Account.id == owner_id))
+        account = result.scalars().first()
         if not account:
             return None
         mall = Mall(name=name, owner_id=owner_id)
@@ -45,7 +48,8 @@ class MallService:
         if not mall:
             return None
         if owner_id is not None:
-            account = self._db.query(Account).filter(Account.id == owner_id).first()
+            result = self._db.execute(select(Account).where(Account.id == owner_id))
+            account = result.scalars().first()
             if not account:
                 return None
             mall.owner_id = owner_id
