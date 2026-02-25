@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -18,9 +19,18 @@ setup_logging()  # Set up root logging before emitting any log
 logging.info(f"Logging initialized for {config.app_name}")
 
 # Create DB tables when starting app
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=config.app_name)
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown
+    await engine.dispose()
+
+app = FastAPI(title=config.app_name, lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=Path("./app/resources/static")), name="static")
 templates = Jinja2Templates(directory=Path("./app/resources/templates"))
 

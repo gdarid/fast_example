@@ -1,9 +1,12 @@
 """ Database schema """
 from __future__ import annotations
 
-from typing import Generator
-from sqlalchemy import ForeignKey, UniqueConstraint, create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, relationship, Session
+# from typing import Generator
+from sqlalchemy import ForeignKey, UniqueConstraint  # , create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship  # , sessionmaker, Session
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 
 from app.core.config import config
 
@@ -13,8 +16,11 @@ sql_echo = False if config.sql_echo == "" else sql_echo
 # Only set SQLite-specific connect_args for SQLite URLs
 connect_args = {"check_same_thread": False} if config.db_url.startswith("sqlite") else {}
 
-engine = create_engine(config.db_url, connect_args=connect_args, echo=sql_echo)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_async_engine(config.db_url, connect_args=connect_args, echo=sql_echo)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False, )
+
+# engine = create_engine(config.db_url, connect_args=connect_args, echo=sql_echo)
+# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 class Base(DeclarativeBase):
@@ -52,10 +58,6 @@ class Mall(Base):
     __table_args__ = (UniqueConstraint('name', name='_mall_name_unique'), )
 
 
-# Dependency helper for FastAPI to yield a DB session and close it after request
-def get_session() -> Generator[Session, None, None]:
-    session = SessionLocal()
-    try:
+async def get_session():
+    async with AsyncSessionLocal() as session:
         yield session
-    finally:
-        session.close()

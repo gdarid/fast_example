@@ -1,4 +1,5 @@
-import pytest
+# import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
 
 from tests.set_test_db import TestingSessionLocal
@@ -11,28 +12,19 @@ from app.api.v1.api_user import get_user_service
 from app.api.v1.api_mall import get_mall_service
 
 # Centralized dependency overrides that close sessions
-def override_get_account_service():
-    session = TestingSessionLocal()
-    try:
+async def override_get_account_service():
+    async with TestingSessionLocal() as session:
         yield AccountService(session=session)
-    finally:
-        session.close()
 
-def override_get_user_service():
-    session = TestingSessionLocal()
-    try:
+async def override_get_user_service():
+    async with TestingSessionLocal() as session:
         yield UserService(session=session)
-    finally:
-        session.close()
 
-def override_get_mall_service():
-    session = TestingSessionLocal()
-    try:
+async def override_get_mall_service():
+    async with TestingSessionLocal() as session:
         yield MallService(session=session)
-    finally:
-        session.close()
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 def client():
     # Install overrides just once for the test session
     app.dependency_overrides[get_account_service] = override_get_account_service
@@ -42,6 +34,6 @@ def client():
     with TestClient(app) as c:
         yield c
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 def session_local():
     return TestingSessionLocal()

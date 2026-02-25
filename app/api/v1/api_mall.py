@@ -1,7 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.schema import get_session
 from app.models.account import MallCreate, MallRead, MallUpdate
@@ -9,45 +10,45 @@ from app.services.mall_service import MallService
 
 router = APIRouter()
 
-def get_mall_service(session: Annotated[Session, Depends(get_session)]) -> MallService:
+def get_mall_service(session: Annotated[AsyncSession, Depends(get_session)]) -> MallService:
     return MallService(session=session)
 
 
 @router.get("/malls", response_model=list[MallRead])
-def get_malls(service: Annotated[MallService, Depends(get_mall_service)]):
-    return service.list_malls()
+async def get_malls(service: Annotated[MallService, Depends(get_mall_service)]):
+    return await service.list_malls()
 
 
 @router.post("/malls", response_model=MallRead)
-def create_mall(mall: MallCreate, service: Annotated[MallService, Depends(get_mall_service)]):
-    item_exists = service.check_name(mall.name)
+async def create_mall(mall: MallCreate, service: Annotated[MallService, Depends(get_mall_service)]):
+    item_exists = await service.check_name(mall.name)
     if item_exists:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Mall already exists with this name")
-    mall_new = service.create_mall(mall.name, mall.owner_id)
+    mall_new = await service.create_mall(mall.name, mall.owner_id)
     if not mall_new:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Mall can't be created")
     return mall_new
 
 
 @router.get("/malls/{mall_id}", response_model=MallRead)
-def get_mall(mall_id: int, service: Annotated[MallService, Depends(get_mall_service)]):
-    mall = service.get_mall(mall_id)
+async def get_mall(mall_id: int, service: Annotated[MallService, Depends(get_mall_service)]):
+    mall = await service.get_mall(mall_id)
     if not mall:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mall not found")
     return mall
 
 
 @router.put("/malls/{mall_id}", response_model=MallRead)
-def update_mall(mall_id: int, mall: MallUpdate, service: Annotated[MallService, Depends(get_mall_service)]):
-    updated = service.update_mall(mall_id, mall.name, mall.owner_id)
+async def update_mall(mall_id: int, mall: MallUpdate, service: Annotated[MallService, Depends(get_mall_service)]):
+    updated = await service.update_mall(mall_id, mall.name, mall.owner_id)
     if updated is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mall not found")
     return updated
 
 
 @router.delete("/malls/{mall_id}")
-def delete_mall(mall_id: int, service: Annotated[MallService, Depends(get_mall_service)]):
-    success = service.delete_mall(mall_id)
+async def delete_mall(mall_id: int, service: Annotated[MallService, Depends(get_mall_service)]):
+    success = await service.delete_mall(mall_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mall not found")
     return {"success": True}

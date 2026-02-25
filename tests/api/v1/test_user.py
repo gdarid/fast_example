@@ -1,9 +1,12 @@
+import pytest
+
 from app.api.v1.api_user import get_user_service
 from app.services.user_service import UserService
 
 # Predefined fixture : client
 
-def test_create_and_get_user(client):
+@pytest.mark.asyncio
+async def test_create_and_get_user(client):
     # Create a new user
     response = client.post("/api/v1/users", json={"name": "Test User"})
     assert response.status_code == 200
@@ -26,12 +29,14 @@ def test_create_and_get_user(client):
     assert users[0]["id"] == created_user["id"]
     assert users[0]["name"] == "Test User"
 
-def test_create_same_user(client):
+@pytest.mark.asyncio
+async def test_create_same_user(client):
     # Create same user
     response = client.post("/api/v1/users", json={"name": "Test User"})
     assert response.status_code == 409
 
-def test_create_update_delete_user(client):
+@pytest.mark.asyncio
+async def test_create_update_delete_user(client):
     response = client.post("/api/v1/users", json={"name": "Test User 2"})
     assert response.status_code == 200
     created_user = response.json()
@@ -42,15 +47,18 @@ def test_create_update_delete_user(client):
     response = client.delete(f"/api/v1/users/{created_user['id']}")
     assert response.status_code == 200
 
-def test_get_wrong_user(client):
+@pytest.mark.asyncio
+async def test_get_wrong_user(client):
     response = client.get("/api/v1/users/0")
     assert response.status_code == 404
 
-def test_update_wrong_user(client):
+@pytest.mark.asyncio
+async def test_update_wrong_user(client):
     response = client.put("/api/v1/users/0", json={"name": "Test User 2 - Updated"})
     assert response.status_code == 404
 
-def test_delete_wrong_user(client):
+@pytest.mark.asyncio
+async def test_delete_wrong_user(client):
     response = client.delete("/api/v1/users/0")
     assert response.status_code == 404
 
