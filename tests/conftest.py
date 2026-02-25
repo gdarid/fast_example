@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tests.set_test_db import TestingSessionLocal
-from app.main import app
+from main import app
 from app.services.account_service import AccountService
 from app.services.user_service import UserService
 from app.services.mall_service import MallService

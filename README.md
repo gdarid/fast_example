@@ -7,7 +7,7 @@ This is a basic FastAPI application
 The server can be started, in development mode, with reload option
 
 ``` bash
-uv run uvicorn app.main:app --reload
+uv run uvicorn main:app --reload
 ```
 
 Once the application is running, some documentation is available :
