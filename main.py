@@ -1,6 +1,12 @@
 import logging
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import config  # Import config before the other custom code
 from app.api.v1 import api_user, api_account, api_mall
@@ -15,12 +21,37 @@ logging.info(f"Logging initialized for {config.app_name}")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=config.app_name)
-
+app.mount("/static", StaticFiles(directory=Path("./app/resources/static")), name="static")
+templates = Jinja2Templates(directory=Path("./app/resources/templates"))
 
 # Register routes
 app.include_router(api_user.router, prefix="/api/v1")
 app.include_router(api_account.router, prefix="/api/v1")
 app.include_router(api_mall.router, prefix="/api/v1")
+
+@app.exception_handler(StarletteHTTPException)
+def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
+    message = (
+        exception.detail
+        if exception.detail
+        else "An error occurred. Please check your request and try again."
+    )
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=exception.status_code,
+            content={"detail": message},
+        )
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {
+            "status_code": exception.status_code,
+            "title": exception.status_code,
+            "message": message,
+        },
+        status_code=exception.status_code,
+    )
+
 
 # Possibility to run uvicorn directly with main.py
 if __name__ == '__main__':
