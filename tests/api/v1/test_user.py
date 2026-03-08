@@ -3,6 +3,11 @@ from app.services.user_service import UserService
 
 # Predefined fixture : client
 
+def test_create_unprocessable_user(client):
+    # Create a new user with unprocessable data
+    response = client.post("/api/v1/users", json={"fake_key": "Test User"})
+    assert response.status_code == 422
+
 def test_create_and_get_user(client):
     # Create a new user
     response = client.post("/api/v1/users", json={"name": "Test User"})
